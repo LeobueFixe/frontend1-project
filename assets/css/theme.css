@@ -1,0 +1,46 @@
+:root {
+  --bg: #F5F5F0;
+  --text: #040316;
+  --primary: #2E2E2E;
+  --secondary: #ffffff;
+  --accent: #C2A878;
+
+  --font-main: "Poppins", sans-serif;
+  --font-title: "Playfair Display", serif;
+
+  --small: 1.4rem;
+  --normal: 1.8rem;
+  --large: 2.2rem;
+}
+
+.dark {
+  --bg: #1E1E1C;
+  --text: #eae9fc;
+  --primary: #EDE6D6;
+  --secondary: #2B2B28;
+  --accent: #A68A64;
+
+  --font-main: "Poppins", sans-serif;
+  --font-title: "Playfair Display", serif;
+
+  --small: 1.4rem;
+  --normal: 1.8rem;
+  --large: 2.2rem;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  font-size: var(--normal);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-title);
+  font-size: var(--large);
+}
+
+.small-text {
+  font-size: var(--small);
+}
+

@@ -1,0 +1,75 @@
+.map-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.map-container iframe {
+  max-width: 800px;
+  max-height: 500px;
+}
+
+.menu {
+  width: 65%;
+  padding: 0.8rem 1.6rem 1.6rem 1.6rem; 
+  background: var(--secondary);
+  border-radius: 16px;
+  margin-top: 15px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.05); 
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;          
+    font-size: 1.2rem;          
+    border-bottom: 1px dotted var(--accent);
+    color: var(--text);
+}
+
+.menu-item:last-child {
+    border-bottom: none;
+}
+.dish-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.separator {
+    margin: 0 0.6rem;   
+    padding-top: 10px;        
+    color: var(--accent);
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.dish-price {
+    width: 60px;                
+    text-align: right;
+    display: inline-block;
+    font-weight: 600;
+}
