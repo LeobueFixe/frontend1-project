@@ -8,30 +8,36 @@
     <link rel="stylesheet" href="assets/css/home.css">
     <link rel="stylesheet" href="assets/css/navbar.css">
     <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/reservation.css">
+    <link rel="stylesheet" href="assets/css/hero.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
 </head>
 <body>
     <al-navbar></al-navbar>
     <main>
-        <div class="layout">
-            <div class="left">
-                <div class="left-top">
-                    <div class="menu">
-                        <h2 id="menu-title">Menu</h2>
-                        <div id="menu-items"></div>
-                    </div>
-                </div>
+        <section id="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>Bem-vindo ao AlCafe</h1>
+                <p>Sabores tradicionais, ambiente acolhedor e momentos que ficam.</p>
+                <a href="#book-table" class="hero-btn">Reservar Mesa</a>
             </div>
-            <div class="right-top">
-                <section id="about-us">
-                    <h2>Sobre Nós</h2>
-                    <p>
-                        Somos um espaço simples, feito para quem gosta de boa comida e de momentos tranquilos. No AlCafe ,valorizamos os sabores tradicionais, o ambiente acolhedor e o atendimento próximo.
-                        Aqui, cada prato é preparado com cuidado, usando ingredientes frescos e receitas que respeitam o que é simples e genuíno. Seja para um café rápido, um almoço em família ou um encontro com amigos, queremos que se sinta sempre bem-vindo.
-                    </p>
-                </section>
+        </section>
+
+        <section id="about-us">
+            <div class="about-left">
+                <h2 class="about-title">Sobre Nós</h2>
+                <div class="about-line"></div>
+
+                <p class="about-text">
+                    Somos um espaço simples, feito para quem gosta de boa comida e de momentos tranquilos. No AlCafe, valorizamos os sabores tradicionais, o ambiente acolhedor e o atendimento próximo.
+                    Aqui, cada prato é preparado com cuidado, usando ingredientes frescos e receitas que respeitam o que é simples e genuíno. Seja para um café rápido, um almoço em família ou um encontro com amigos, queremos que se sinta sempre bem-vindo.
+                </p>
             </div>
-            <div class="right-bottom">
-                <div id="map" class="map-container">
+
+            <div class="about-right">
+                <div class="map-container">
                     <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1587.5666398381998!2d-8.1526152!3d37.268266499999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ac7d1232acb59%3A0x198b96c9df83c27a!2sAL&#39;CAF%C3%89%20-%20SNACK-BAR!5e0!3m2!1spt-PT!2spt!4v1776457849613!5m2!1spt-PT!2spt"
                         allowfullscreen=""
@@ -40,10 +46,86 @@
                     </iframe>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <section id="reservations-section">
+            <div class="reservations-left">
+                <h2 class="section-title">Reservas</h2>
+
+                <form id="form-reservation">
+
+                    <label for="fullname">Nome e Sobrenome</label>
+                    <input type="text" id="fullname" name="fullname" required>
+                    
+                    <label for="phone">Número de telefone</label>
+                    <div class="phone-wrapper">
+                        <select id="country-code"></select>
+                        <input type="tel" id="phone" name="phone" placeholder="912 345 678" required>
+                    </div>
+
+                    <label for="day">Escolha um dia</label>
+                    <input type="date" id="day" name="day" required>
+
+                    <label for="service">Escolha um serviço</label>
+                    <select id="service" name="service" required>
+                        <option value="">Escolha...</option>
+                        <option value="lunch">Almoço (12:00–15:00)</option>
+                        <option value="dinner">Jantar (19:00–21:00)</option>
+                    </select>
+
+                    <label for="time">Hora</label>
+                    <select id="time" name="time" required>
+                        <option value="">Escolha a hora...</option>
+                    </select>
+
+                    <label for="people">Número de pessoas</label>
+                    <input type="number" id="people" name="people" min="1" max="20" value="2" required>
+
+                    <label for="allergy">Alergias ou Restrições Alimentares</label>
+                    <textarea id="allergy" name="allergy" placeholder="Descreva suas alergias ou restrições..."></textarea>
+
+                    <button type="submit" class="btn-primary">Reservar</button>
+
+                    <a href="#contact" class="help-link">Precisa de ajuda?</a>
+
+                </form>
+            </div>
+            <div class="reservations-right">
+                <div id="menu-day-selector">
+                    <button id="prev-day" class="day-arrow">‹</button>
+                    <div id="day-carousel"></div>
+                    <button id="next-day" class="day-arrow">›</button>
+                </div>
+                <div id="menu-items"></div>
+            </div>
+        </section>
+        <section id="admin-section">
+            <h2 class="section-title">Gestão</h2>
+
+            <div class="admin-container">
+
+                <div class="admin-box">
+                    <h3 class="admin-subtitle">Reservas</h3>
+                    <div id="admin-reservations" class="admin-list">
+                        <p class="placeholder">Nenhuma reserva encontrada.</p>
+                    </div>
+                </div>
+                <div class="admin-box">
+                    <h3 class="admin-subtitle">Contactos</h3>
+                    <div id="admin-contacts" class="admin-list">
+                        <p class="placeholder">Nenhum contacto recebido.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 <script src="assets/scripts/theme.js"></script>
 <script src="assets/scripts/menu.js"></script>
 <script src="assets/scripts/components.js"></script>
+<script src="assets/scripts/reservations.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 </body>
 </html>
