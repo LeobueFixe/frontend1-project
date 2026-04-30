@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="assets/css/theme.css">
     <link rel="stylesheet" href="assets/css/home.css">
     <link rel="stylesheet" href="assets/css/navbar.css">
-    <link rel="stylesheet" href="assets/css/components.css">
     <link rel="stylesheet" href="assets/css/reservation.css">
     <link rel="stylesheet" href="assets/css/hero.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -21,7 +20,7 @@
             <div class="hero-content">
                 <h1>Bem-vindo ao AlCafe</h1>
                 <p>Sabores tradicionais, ambiente acolhedor e momentos que ficam.</p>
-                <a href="#book-table" class="hero-btn">Reservar Mesa</a>
+                <a href="#reservations-section" class="hero-btn">Reservar Mesa</a>
             </div>
         </section>
 
@@ -59,8 +58,7 @@
                     
                     <label for="phone">Número de telefone</label>
                     <div class="phone-wrapper">
-                        <select id="country-code"></select>
-                        <input type="tel" id="phone" name="phone" placeholder="912 345 678" required>
+                        <input type="tel" id="phone" name="phone" placeholder="... ... ..." required>
                     </div>
 
                     <label for="day">Escolha um dia</label>
@@ -74,12 +72,10 @@
                     </select>
 
                     <label for="time">Hora</label>
-                    <select id="time" name="time" required>
-                        <option value="">Escolha a hora...</option>
-                    </select>
+                    <input type="time" id="time" name="time" required>
 
                     <label for="people">Número de pessoas</label>
-                    <input type="number" id="people" name="people" min="1" max="20" value="2" required>
+                    <input type="number" id="people" name="people" min="1" max="15" value="2" required>
 
                     <label for="allergy">Alergias ou Restrições Alimentares</label>
                     <textarea id="allergy" name="allergy" placeholder="Descreva suas alergias ou restrições..."></textarea>
@@ -99,10 +95,10 @@
                 <div id="menu-items"></div>
             </div>
         </section>
-        <section id="admin-section">
+        <section id="edit-reservations">
             <h2 class="section-title">Gestão</h2>
 
-            <div class="admin-container">
+            <div class="reservations-container">
 
                 <div class="admin-box">
                     <h3 class="admin-subtitle">Reservas</h3>
@@ -110,10 +106,11 @@
                         <p class="placeholder">Nenhuma reserva encontrada.</p>
                     </div>
                 </div>
-                <div class="admin-box">
+                <div class="reservat-box">
                     <h3 class="admin-subtitle">Contactos</h3>
                     <div id="admin-contacts" class="admin-list">
-                        <p class="placeholder">Nenhum contacto recebido.</p>
+                        <p class="placeholder">Numero de telemovel: 964958341.</p>
+                        <p class="placeholder">Email: alcafe_snackbar@gmail.com</p>
                     </div>
                 </div>
 
@@ -121,11 +118,11 @@
         </section>
 
     </main>
-<script src="assets/scripts/theme.js"></script>
-<script src="assets/scripts/menu.js"></script>
-<script src="assets/scripts/components.js"></script>
-<script src="assets/scripts/reservations.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="assets/scripts/components.js" defer></script>
+<script src="assets/scripts/menu.js" defer></script>
+<script src="assets/scripts/reservations.js" defer></script>
+
 
 </body>
 </html>

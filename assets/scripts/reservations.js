@@ -1,7 +1,3 @@
-const API_BASE_URL = "https://69f24f77b15130b97352ca03.mockapi.io/api/v1";
-const RESERVATIONS_ENDPOINT = `${API_BASE_URL}/reservation`;
-
-
 function toastSuccess(message) {
   Toastify({
     text: message,
@@ -33,63 +29,32 @@ function toastWarning(message) {
 }
 
 
-async function sendReservationToAPI(reservation) {
-  const response = await fetch(RESERVATIONS_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(reservation)
-  });
-  if (!response.ok) throw new Error("Erro ao enviar reserva para API");
-  return response.json();
-}
-
-
-if (service && timeSelect) {
-  service.addEventListener("change", () => {
-    if (service.value === "lunch") {
-      generateTimeOptions(12, 15);
-    } else if (service.value === "dinner") {
-      generateTimeOptions(19, 21);
-    } else {
-      timeSelect.innerHTML = `<option value="">Escolha a hora...</option>`;
-    }
-  });
-}
-
-
-
-const countrySelect = document.getElementById("country-code");
+const service = document.getElementById("service");
+const timeInput = document.getElementById("time"); 
 const phoneInput = document.getElementById("phone");
-
-const countryList = [
-  { name: "Portugal", code: "+351", flag: "🇵🇹" },
-  { name: "França", code: "+33", flag: "🇫🇷" }
-];
-
-function loadCountryCodes() {
-  if (!countrySelect || !phoneInput) return;
-
-  countryList.forEach(country => {
-    const option = document.createElement("option");
-    option.value = country.code;
-    option.textContent = `${country.flag} ${country.name} (${country.code})`;
-    countrySelect.appendChild(option);
-  });
-
-  countrySelect.value = "+351";
-  phoneInput.placeholder = "+351 ...";
-}
-
-if (countrySelect && phoneInput) {
-  countrySelect.addEventListener("change", () => {
-    phoneInput.placeholder = countrySelect.value + " ...";
-  });
-
-  loadCountryCodes();
-}
-
-
 const form = document.getElementById("form-reservation");
+
+
+service.addEventListener("change", () => {
+  if (service.value === "lunch") {
+    timeInput.min = "12:00";
+    timeInput.max = "15:00";
+    timeInput.step = 1800; 
+    timeInput.value = "";
+  } 
+  else if (service.value === "dinner") {
+    timeInput.min = "17:00";
+    timeInput.max = "21:00";
+    timeInput.step = 1800; 
+    timeInput.value = "";
+  } 
+  else {
+    timeInput.min = "";
+    timeInput.max = "";
+    timeInput.step = "";
+    timeInput.value = "";
+  }
+});
 
 function saveReservationLocal(reservation) {
   const stored = JSON.parse(localStorage.getItem("reservations")) || [];
@@ -97,15 +62,18 @@ function saveReservationLocal(reservation) {
   localStorage.setItem("reservations", JSON.stringify(stored));
 }
 
+
 async function sendReservationToAPI(reservation) {
   const response = await fetch(RESERVATIONS_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(reservation)
   });
+
   if (!response.ok) throw new Error("Erro ao enviar reserva para API");
   return response.json();
 }
+
 
 if (form) {
   form.addEventListener("submit", async (e) => {
@@ -113,7 +81,7 @@ if (form) {
 
     const reservation = {
       fullname: form.fullname.value,
-      phone: `${countrySelect?.value || ""} ${phoneInput?.value || ""}`,
+      phone: phoneInput.value,
       day: form.day.value,
       service: form.service.value,
       time: form.time.value,
@@ -126,15 +94,8 @@ if (form) {
     try {
       await sendReservationToAPI(reservation);
       toastSuccess("Reserva enviada com sucesso!");
-
       form.reset();
-      if (countrySelect && phoneInput) {
-        countrySelect.value = "+351";
-        phoneInput.placeholder = "+351 ...";
-      }
-
     } catch (error) {
-      console.error("Erro ao enviar reserva para API:", error);
       toastError("Sem ligação — reserva guardada localmente.");
     }
   });
@@ -142,6 +103,8 @@ if (form) {
 
 async function loadReservations() {
   const container = document.getElementById("admin-reservations");
+  if (!container) return;
+
   container.innerHTML = `<p class="placeholder">A carregar...</p>`;
 
   try {
@@ -227,3 +190,84 @@ async function deleteReservation(id) {
 }
 
 document.addEventListener("DOMContentLoaded", loadReservations);
+
+
+async function loadUserReservation() {
+    const box = document.getElementById("user-reservation-box");
+    if (!box) return;
+
+    const myId = localStorage.getItem("myReservationId");
+
+    if (!myId) {
+        box.innerHTML = `<p class="placeholder">Nenhuma reserva encontrada.</p>`;
+        return;
+    }
+
+    try {
+        const res = await fetch(`${RESERVATIONS_ENDPOINT}/${myId}`);
+        if (!res.ok) throw new Error();
+
+        const r = await res.json();
+
+        box.innerHTML = `
+            <div class="user-reservation">
+                <p><strong>Nome:</strong> ${r.fullname}</p>
+                <p><strong>Telefone:</strong> ${r.phone}</p>
+                <p><strong>Dia:</strong> ${r.day}</p>
+                <p><strong>Serviço:</strong> ${r.service}</p>
+                <p><strong>Hora:</strong> ${r.time}</p>
+                <p><strong>Pessoas:</strong> ${r.people}</p>
+                <p><strong>Alergias:</strong> ${r.allergy || "Nenhuma"}</p>
+
+                <div class="user-actions">
+                    <button class="btn-edit" onclick="userEditReservation('${r.id}')">Editar</button>
+                    <button class="btn-delete" onclick="userDeleteReservation('${r.id}')">Eliminar</button>
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        box.innerHTML = `<p class="placeholder">Erro ao carregar reserva.</p>`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadUserReservation);
+
+
+async function userEditReservation(id) {
+    const newName = prompt("Novo nome:");
+    if (!newName) return toastWarning("Edição cancelada.");
+
+    try {
+        await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fullname: newName })
+        });
+
+        toastSuccess("Reserva atualizada!");
+        loadUserReservation();
+
+    } catch (error) {
+        toastError("Erro ao editar reserva.");
+    }
+}
+
+
+async function userDeleteReservation(id) {
+    if (!confirm("Tem a certeza que quer eliminar a sua reserva?")) return;
+
+    try {
+        await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
+            method: "DELETE"
+        });
+
+        localStorage.removeItem("myReservationId");
+        toastError("Reserva eliminada!");
+
+        loadUserReservation();
+
+    } catch (error) {
+        toastError("Erro ao eliminar reserva.");
+    }
+}
