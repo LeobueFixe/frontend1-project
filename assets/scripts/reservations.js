@@ -1,67 +1,58 @@
-function toastSuccess(message) {
-  Toastify({
-    text: message,
-    duration: 3000,
-    gravity: "top",
-    position: "right",
-    backgroundColor: "#4CAF50"
-  }).showToast();
-}
+const LUNCH_SLOTS  = ["12:00","12:30","13:00","13:30","14:00","14:30","15:00"];
+const DINNER_SLOTS = ["19:00","19:30","20:00","20:30","21:00","21:30","22:00"];
 
-function toastError(message) {
-  Toastify({
-    text: message,
-    duration: 3000,
-    gravity: "top",
-    position: "right",
-    backgroundColor: "#E53935"
-  }).showToast();
-}
+let selectedTime    = null;
+let selectedService = null;
 
-function toastWarning(message) {
-  Toastify({
-    text: message,
-    duration: 3000,
-    gravity: "top",
-    position: "right",
-    backgroundColor: "#FFA000"
-  }).showToast();
-}
+function buildTimeSlots() {
+  const wrapper = document.getElementById("time-slots");
+  if (!wrapper) return;
 
+  wrapper.innerHTML = "";
 
-const service = document.getElementById("service");
-const timeInput = document.getElementById("time"); 
-const phoneInput = document.getElementById("phone");
-const form = document.getElementById("form-reservation");
+  function makeGroup(label, slots, service) {
+    const group = document.createElement("div");
+    group.className = "slot-group";
 
+    const title = document.createElement("span");
+    title.className = "slot-group-label";
+    title.textContent = label;
+    group.appendChild(title);
 
-service.addEventListener("change", () => {
-  if (service.value === "lunch") {
-    timeInput.min = "12:00";
-    timeInput.max = "15:00";
-    timeInput.step = 1800; 
-    timeInput.value = "";
-  } 
-  else if (service.value === "dinner") {
-    timeInput.min = "17:00";
-    timeInput.max = "21:00";
-    timeInput.step = 1800; 
-    timeInput.value = "";
-  } 
-  else {
-    timeInput.min = "";
-    timeInput.max = "";
-    timeInput.step = "";
-    timeInput.value = "";
+    const pills = document.createElement("div");
+    pills.className = "slot-pills";
+
+    slots.forEach(time => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-pill";
+      btn.textContent = time;
+      btn.dataset.time = time;
+      btn.dataset.service = service;
+
+      btn.addEventListener("click", () => {
+        wrapper.querySelectorAll(".slot-pill").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        selectedTime    = time;
+        selectedService = service;
+      });
+
+      pills.appendChild(btn);
+    });
+
+    group.appendChild(pills);
+    return group;
   }
-});
 
-function saveReservationLocal(reservation) {
-  const stored = JSON.parse(localStorage.getItem("reservations")) || [];
-  stored.push(reservation);
-  localStorage.setItem("reservations", JSON.stringify(stored));
+  wrapper.appendChild(makeGroup("Almoço (12:00 – 15:00)", LUNCH_SLOTS,  "lunch"));
+  wrapper.appendChild(makeGroup("Jantar (19:00 – 22:00)", DINNER_SLOTS, "dinner"));
 }
 
+function saveReservationLocal(reservationId) {
+  let ids = JSON.parse(localStorage.getItem("myReservationIds")) || [];
+  ids.push(reservationId);
+  localStorage.setItem("myReservationIds", JSON.stringify(ids));
+}
 
 async function sendReservationToAPI(reservation) {
   const response = await fetch(RESERVATIONS_ENDPOINT, {
@@ -69,205 +60,190 @@ async function sendReservationToAPI(reservation) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(reservation)
   });
-
   if (!response.ok) throw new Error("Erro ao enviar reserva para API");
   return response.json();
 }
 
+function initReservationForm() {
+  const form        = document.getElementById("form-reservation");
+  const phoneInput  = document.getElementById("phone");
+  if (!form) return;
 
-if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (!selectedTime) {
+      toastWarning("Por favor escolha uma hora.");
+      return;
+    }
+
+    if (phoneInput.value.length < 9) {
+      toastWarning("Por favor insira um número válido.");
+      return;
+    }
+
     const reservation = {
-      fullname: form.fullname.value,
-      phone: phoneInput.value,
-      day: form.day.value,
-      service: form.service.value,
-      time: form.time.value,
-      people: form.people.value,
-      allergy: form.allergy.value
+      fullname: form.fullname.value.trim(),
+      phone:    phoneInput.value.trim(),
+      day:      form.day.value,
+      service:  selectedService,
+      time:     selectedTime,
+      people:   form.people.value,
+      allergy:  form.allergy.value.trim()
     };
 
-    saveReservationLocal(reservation);
-
     try {
-      await sendReservationToAPI(reservation);
+      const saved = await sendReservationToAPI(reservation);
+
+      if (saved && saved.id) {
+        saveReservationLocal(saved.id);
+      }
+
       toastSuccess("Reserva enviada com sucesso!");
       form.reset();
+
+      document.querySelectorAll(".slot-pill").forEach(p => p.classList.remove("active"));
+      selectedTime    = null;
+      selectedService = null;
+
+      loadMyReservation();
+
     } catch (error) {
       toastError("Sem ligação — reserva guardada localmente.");
     }
   });
 }
 
-async function loadReservations() {
-  const container = document.getElementById("admin-reservations");
-  if (!container) return;
+async function loadMyReservation() {
+  const box = document.getElementById("my-reservation-box");
+  if (!box) return;
 
-  container.innerHTML = `<p class="placeholder">A carregar...</p>`;
+  const myIds = JSON.parse(localStorage.getItem("myReservationIds")) || [];
+
+  if (myIds.length === 0) {
+    box.innerHTML = `<p class="placeholder">Ainda não tens nenhuma reserva registada.</p>`;
+    return;
+  }
+
+  box.innerHTML = `<p class="placeholder">A carregar...</p>`;
 
   try {
-    const res = await fetch(RESERVATIONS_ENDPOINT);
-    const data = await res.json();
+    const cards = [];
 
-    if (data.length === 0) {
-      container.innerHTML = `<p class="placeholder">Nenhuma reserva encontrada.</p>`;
+    for (const id of myIds) {
+      const res = await fetch(`${RESERVATIONS_ENDPOINT}/${id}`);
+      if (!res.ok) continue;
+
+      const r = await res.json();
+
+      cards.push(`
+        <div class="my-reservation-card" data-id="${r.id}">
+          <div class="my-reservation-row"><span class="label">Nome</span><span>${r.fullname}</span></div>
+          <div class="my-reservation-row"><span class="label">Telefone</span><span>${r.phone}</span></div>
+          <div class="my-reservation-row"><span class="label">Dia</span><span>${r.day}</span></div>
+          <div class="my-reservation-row"><span class="label">Serviço</span><span>${r.service === "lunch" ? "Almoço" : "Jantar"}</span></div>
+          <div class="my-reservation-row"><span class="label">Hora</span><span>${r.time}</span></div>
+          <div class="my-reservation-row"><span class="label">Pessoas</span><span>${r.people}</span></div>
+          <div class="my-reservation-row"><span class="label">Alergias</span><span>${r.allergy || "Nenhuma"}</span></div>
+          <div class="my-reservation-actions">
+            <button class="btn-edit"   onclick="myEditReservation('${r.id}')">Editar nome</button>
+            <button class="btn-delete" onclick="myDeleteReservation('${r.id}')">Cancelar reserva</button>
+          </div>
+        </div>
+      `);
+    }
+
+    if (cards.length === 0) {
+      box.innerHTML = `<p class="placeholder">Nenhuma reserva encontrada.</p>`;
       return;
     }
 
-    container.innerHTML = "";
+    box.innerHTML = cards.join("");
 
-    data.forEach(reservation => {
-      const div = document.createElement("div");
-      div.className = "reservation-item";
-      div.innerHTML = `
-        <div>
-          <strong>${reservation.fullname}</strong><br>
-          ${reservation.day} • ${reservation.time} • ${reservation.people} pessoas
-        </div>
-
-        <div class="admin-actions">
-          <button class="btn-edit" onclick="editReservation('${reservation.id}')">Editar</button>
-          <button class="btn-delete" onclick="deleteReservation('${reservation.id}')">Eliminar</button>
-        </div>
-      `;
-
-      container.appendChild(div);
-    });
-
-  } catch (error) {
-    container.innerHTML = `<p class="placeholder">Erro ao carregar reservas.</p>`;
+  } catch {
+    box.innerHTML = `<p class="placeholder">Erro ao carregar reservas.</p>`;
   }
 }
 
-async function editReservation(id) {
-  const newName = prompt("Novo nome para a reserva:");
-  if (!newName) {
-    toastWarning("Edição cancelada.");
-    return;
-  }
+async function myEditReservation(id) {
+  const box = document.getElementById("my-reservation-box");
+  const card = box.querySelector(`.my-reservation-card[data-id="${id}"]`);
+  const row = card.querySelector(".my-reservation-row:nth-child(1) span:last-child");
 
-  try {
-    await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullname: newName })
-    });
+  const oldName = row.textContent;
 
-    toastSuccess("Reserva editada com sucesso!");
-    loadReservations();
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = oldName;
+  input.className = "inline-edit-input";
 
-  } catch (error) {
-    toastError("Erro ao editar reserva.");
-  }
-}
+  row.replaceWith(input);
+  input.focus();
 
-async function deleteReservation(id) {
-  const first = confirm("Tem a certeza que quer eliminar esta reserva?");
-  if (!first) {
-    toastWarning("Eliminação cancelada.");
-    return;
-  }
+  input.addEventListener("blur", async () => {
+    const newName = input.value.trim();
 
-  const second = confirm("Tem MESMO a certeza? Esta ação é irreversível.");
-  if (!second) {
-    toastWarning("Eliminação cancelada.");
-    return;
-  }
-
-  try {
-    await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
-      method: "DELETE"
-    });
-
-    toastError("Reserva eliminada!");
-    loadReservations();
-
-  } catch (error) {
-    toastError("Erro ao eliminar reserva.");
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadReservations);
-
-
-async function loadUserReservation() {
-    const box = document.getElementById("user-reservation-box");
-    if (!box) return;
-
-    const myId = localStorage.getItem("myReservationId");
-
-    if (!myId) {
-        box.innerHTML = `<p class="placeholder">Nenhuma reserva encontrada.</p>`;
-        return;
+    if (!newName || newName === oldName) {
+      input.replaceWith(row);
+      return;
     }
 
     try {
-        const res = await fetch(`${RESERVATIONS_ENDPOINT}/${myId}`);
-        if (!res.ok) throw new Error();
+      await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullname: newName })
+      });
 
-        const r = await res.json();
+      toastSuccess("Nome atualizado!");
+      loadMyReservation();
 
-        box.innerHTML = `
-            <div class="user-reservation">
-                <p><strong>Nome:</strong> ${r.fullname}</p>
-                <p><strong>Telefone:</strong> ${r.phone}</p>
-                <p><strong>Dia:</strong> ${r.day}</p>
-                <p><strong>Serviço:</strong> ${r.service}</p>
-                <p><strong>Hora:</strong> ${r.time}</p>
-                <p><strong>Pessoas:</strong> ${r.people}</p>
-                <p><strong>Alergias:</strong> ${r.allergy || "Nenhuma"}</p>
-
-                <div class="user-actions">
-                    <button class="btn-edit" onclick="userEditReservation('${r.id}')">Editar</button>
-                    <button class="btn-delete" onclick="userDeleteReservation('${r.id}')">Eliminar</button>
-                </div>
-            </div>
-        `;
-
-    } catch (error) {
-        box.innerHTML = `<p class="placeholder">Erro ao carregar reserva.</p>`;
+    } catch {
+      toastError("Erro ao editar.");
+      input.replaceWith(row);
     }
+  });
 }
 
-document.addEventListener("DOMContentLoaded", loadUserReservation);
+async function myDeleteReservation(id) {
+  const box = document.getElementById("my-reservation-box");
+  const card = box.querySelector(`.my-reservation-card[data-id="${id}"]`);
 
+  if (card.querySelector(".delete-confirm")) return;
 
-async function userEditReservation(id) {
-    const newName = prompt("Novo nome:");
-    if (!newName) return toastWarning("Edição cancelada.");
+  const confirmBar = document.createElement("div");
+  confirmBar.className = "delete-confirm";
+  confirmBar.innerHTML = `
+    <span>Cancelar esta reserva?</span>
+    <button class="yes">Sim</button>
+    <button class="no">Não</button>
+  `;
 
+  card.appendChild(confirmBar);
+
+  confirmBar.querySelector(".no").onclick = () => confirmBar.remove();
+
+  confirmBar.querySelector(".yes").onclick = async () => {
     try {
-        await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fullname: newName })
-        });
+      await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, { method: "DELETE" });
 
-        toastSuccess("Reserva atualizada!");
-        loadUserReservation();
+      let myIds = JSON.parse(localStorage.getItem("myReservationIds")) || [];
+      myIds = myIds.filter(x => x !== id);
+      localStorage.setItem("myReservationIds", JSON.stringify(myIds));
 
-    } catch (error) {
-        toastError("Erro ao editar reserva.");
+      toastWarning("Reserva cancelada.");
+      loadMyReservation();
+
+    } catch {
+      toastError("Erro ao cancelar.");
     }
+  };
 }
 
 
-async function userDeleteReservation(id) {
-    if (!confirm("Tem a certeza que quer eliminar a sua reserva?")) return;
 
-    try {
-        await fetch(`${RESERVATIONS_ENDPOINT}/${id}`, {
-            method: "DELETE"
-        });
-
-        localStorage.removeItem("myReservationId");
-        toastError("Reserva eliminada!");
-
-        loadUserReservation();
-
-    } catch (error) {
-        toastError("Erro ao eliminar reserva.");
-    }
-}
+document.addEventListener("DOMContentLoaded", () => {
+  buildTimeSlots();
+  initReservationForm();
+  loadMyReservation();
+});

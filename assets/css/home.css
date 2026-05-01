@@ -1,11 +1,17 @@
+/* ═══════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════ */
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow-x: hidden;
 }
-/* ----------------------------- */
-/* ABOUT US SECTION (LEFT + RIGHT) */
-/* ----------------------------- */
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT US
+   ═══════════════════════════════════════════════════════════ */
 
 #about-us {
   height: 100dvh;
@@ -77,12 +83,44 @@ html, body {
 }
 
 @keyframes fadeUp {
-  0% {
-    transform: translateY(40px);
-    opacity: 0;
+  0%   { transform: translateY(40px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+
+
+@media (max-width: 480px) {
+  #about-us {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 100dvh;
   }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
+
+  .about-left {
+    padding: 60px 8vw 32px;
+    justify-content: center;
+  }
+
+  .about-right {
+    padding: 0 6vw 48px;
+  }
+
+  .about-title {
+    font-size: 2rem;
+  }
+
+  .about-text {
+    font-size: 1.1rem;
+    max-width: 100%;
+  }
+
+  .map-container {
+    justify-content: center;
+  }
+
+  .map-container iframe {
+    height: 220px;
+    max-width: 100%;
   }
 }

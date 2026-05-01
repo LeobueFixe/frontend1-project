@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="assets/css/reservation.css">
     <link rel="stylesheet" href="assets/css/hero.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
 </head>
 <body>
     <al-navbar></al-navbar>
+
     <main>
+
         <section id="hero">
             <div class="hero-overlay"></div>
             <div class="hero-content">
@@ -28,16 +29,17 @@
             <div class="about-left">
                 <h2 class="about-title">Sobre Nós</h2>
                 <div class="about-line"></div>
-
                 <p class="about-text">
-                    Somos um espaço simples, feito para quem gosta de boa comida e de momentos tranquilos. No AlCafe, valorizamos os sabores tradicionais, o ambiente acolhedor e o atendimento próximo.
-                    Aqui, cada prato é preparado com cuidado, usando ingredientes frescos e receitas que respeitam o que é simples e genuíno. Seja para um café rápido, um almoço em família ou um encontro com amigos, queremos que se sinta sempre bem-vindo.
+                    Somos um espaço simples, feito para quem gosta de boa comida e de momentos tranquilos.
+                    No AlCafe, valorizamos os sabores tradicionais, o ambiente acolhedor e o atendimento próximo.
+                    Aqui, cada prato é preparado com cuidado, usando ingredientes frescos e receitas que respeitam
+                    o que é simples e genuíno. Seja para um café rápido, um almoço em família ou um encontro com
+                    amigos, queremos que se sinta sempre bem-vindo.
                 </p>
             </div>
-
             <div class="about-right">
                 <div class="map-container">
-                    <iframe
+                    <iframe title="alcafe-map"
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1587.5666398381998!2d-8.1526152!3d37.268266499999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ac7d1232acb59%3A0x198b96c9df83c27a!2sAL&#39;CAF%C3%89%20-%20SNACK-BAR!5e0!3m2!1spt-PT!2spt!4v1776457849613!5m2!1spt-PT!2spt"
                         allowfullscreen=""
                         loading="lazy"
@@ -55,74 +57,55 @@
 
                     <label for="fullname">Nome e Sobrenome</label>
                     <input type="text" id="fullname" name="fullname" required>
-                    
+
                     <label for="phone">Número de telefone</label>
                     <div class="phone-wrapper">
-                        <input type="tel" id="phone" name="phone" placeholder="... ... ..." required>
+                        <input type="tel" id="phone" name="phone" required>
                     </div>
 
                     <label for="day">Escolha um dia</label>
                     <input type="date" id="day" name="day" required>
 
-                    <label for="service">Escolha um serviço</label>
-                    <select id="service" name="service" required>
-                        <option value="">Escolha...</option>
-                        <option value="lunch">Almoço (12:00–15:00)</option>
-                        <option value="dinner">Jantar (19:00–21:00)</option>
-                    </select>
-
-                    <label for="time">Hora</label>
-                    <input type="time" id="time" name="time" required>
+                    <label>Escolha uma hora</label>
+                    <div id="time-slots"></div>
 
                     <label for="people">Número de pessoas</label>
                     <input type="number" id="people" name="people" min="1" max="15" value="2" required>
 
                     <label for="allergy">Alergias ou Restrições Alimentares</label>
-                    <textarea id="allergy" name="allergy" placeholder="Descreva suas alergias ou restrições..."></textarea>
+                    <textarea id="allergy" name="allergy" placeholder="Descreva as suas alergias ou restrições..."></textarea>
 
                     <button type="submit" class="btn-primary">Reservar</button>
 
-                    <a href="#contact" class="help-link">Precisa de ajuda?</a>
-
                 </form>
             </div>
+
             <div class="reservations-right">
                 <div id="menu-day-selector">
-                    <button id="prev-day" class="day-arrow">‹</button>
+                    <button id="prev-day" class="day-arrow">&#8249;</button>
                     <div id="day-carousel"></div>
-                    <button id="next-day" class="day-arrow">›</button>
+                    <button id="next-day" class="day-arrow">&#8250;</button>
                 </div>
                 <div id="menu-items"></div>
             </div>
         </section>
-        <section id="edit-reservations">
-            <h2 class="section-title">Gestão</h2>
 
-            <div class="reservations-container">
-
-                <div class="admin-box">
-                    <h3 class="admin-subtitle">Reservas</h3>
-                    <div id="admin-reservations" class="admin-list">
-                        <p class="placeholder">Nenhuma reserva encontrada.</p>
-                    </div>
-                </div>
-                <div class="reservat-box">
-                    <h3 class="admin-subtitle">Contactos</h3>
-                    <div id="admin-contacts" class="admin-list">
-                        <p class="placeholder">Numero de telemovel: 964958341.</p>
-                        <p class="placeholder">Email: alcafe_snackbar@gmail.com</p>
-                    </div>
-                </div>
-
+        <section id="my-reservation">
+            <h2 class="section-title">A minha reserva</h2>
+            <p class="section-subtitle">Consulta, edita ou cancela a tua reserva mais recente.</p>
+            <div id="my-reservation-box">
+                <p class="placeholder">Ainda não tens nenhuma reserva registada.</p>
             </div>
         </section>
-
+            
     </main>
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script src="assets/scripts/components.js" defer></script>
-<script src="assets/scripts/menu.js" defer></script>
-<script src="assets/scripts/reservations.js" defer></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script src="assets/scripts/api.js"></script>
+    <script src="assets/scripts/components.js"></script>
+    <script src="assets/scripts/menu.js"></script>
+    <script src="assets/scripts/reservations.js"></script>
 
 </body>
 </html>
